@@ -130,8 +130,13 @@ export default function MapViewer() {
 
     // 🔥 Konum Güncelleme İsteği (SESSİZ)
     const requestLocationUpdate = async () => {
-        if (!pushToken) return;
-        setRefreshing(true);
+        if (!pushToken) {
+            alert("Telefona ulaşılamıyor (Token yok).");
+            return;
+        }
+
+        setRefreshing(true); // Dönme efekti başlasın
+
         try {
             await fetch("https://letterchat-server.vercel.app/send-notification", {
                 method: "POST",
@@ -143,13 +148,41 @@ export default function MapViewer() {
                     data: { type: "silent_location" } // Mobile bu emri atıyoruz
                 }),
             });
-            // 3 saniye sonra dönmeyi durdur (Sadece görsel efekt)
-            setTimeout(() => setRefreshing(false), 3000);
+
+            // Kullanıcıya bilgi ver
+            console.log("Konum isteği gönderildi...");
+
+            // 5 saniye sonra dönmeyi durdur
+            setTimeout(() => {
+                setRefreshing(false);
+            }, 5000);
+
         } catch (e) {
             console.log("Update error", e);
             setRefreshing(false);
+            alert("İstek gönderilemedi.");
         }
     };
+
+    // ... (Render kısmında başlığı güncelle)
+
+    {/* Üst Bilgi Paneli */ }
+    <div style={{ ... }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+                <h3 style={{ margin: 0, fontSize: '16px', color: '#333', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {queryUid ? "Çocuk / Aile Takip" : "Cihazımı Bul"}
+
+                    {/* 🔥 YENİLEME BUTONU */}
+                    <button
+                        onClick={requestLocationUpdate}
+                        style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 5 }}
+                        title="Konumu Şimdi Güncelle"
+                    >
+                        <RefreshCw size={18} className={refreshing ? "spin-anim" : ""} color="#7b13d1" />
+                    </button>
+
+                </h3>
 
     // Alarm Çaldır (SESLİ)
     const handleRing = async () => {
